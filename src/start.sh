@@ -20,7 +20,11 @@ if [ "$SERVE_API_LOCALLY" == "true" ]; then
     python -u /handler.py --rp_serve_api --rp_api_host=0.0.0.0
 else
     python -u /comfyui/main.py --disable-auto-launch --disable-metadata --verbose "${COMFY_LOG_LEVEL}" --log-stdout &
+    COMFY_PID=$!
 
     echo "worker-comfyui: Starting RunPod Handler"
     python -u /handler.py
+
+    # Kill ComfyUI when handler exits (important for build test to finish)
+    kill $COMFY_PID 2>/dev/null
 fi
