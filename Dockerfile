@@ -124,7 +124,7 @@ RUN wget -q --show-progress \
 # Download SAM model for segmentation (used by FaceDetailer)
 RUN wget -q --show-progress \
     -O models/sams/sam_vit_b_01ec64.pth \
-    https://huggingface.co/spaces/jbrinkma/segment-anything/resolve/main/sam_vit_b_01ec64.pth
+    https://huggingface.co/YouLiXiya/YL-SAM/resolve/main/sam_vit_b_01ec64.pth
 
 # Stage 3: Final image
 FROM base AS final
