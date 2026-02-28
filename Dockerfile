@@ -91,7 +91,10 @@ RUN chmod +x /usr/local/bin/comfy-manager-set-mode
 # Set the default command to run when starting the container
 CMD ["/start.sh"]
 
-# Stage 2: Download Illustrious XL v2.0 model
+# Install custom nodes: Impact Pack (FaceDetailer) + Subpack (UltralyticsDetectorProvider)
+RUN comfy-node-install comfyui-impact-pack comfyui-impact-subpack
+
+# Stage 2: Download models
 FROM base AS downloader
 
 ARG HUGGINGFACE_ACCESS_TOKEN
@@ -100,7 +103,7 @@ ARG HUGGINGFACE_ACCESS_TOKEN
 WORKDIR /comfyui
 
 # Create necessary directories
-RUN mkdir -p models/checkpoints models/vae
+RUN mkdir -p models/checkpoints models/vae models/upscale_models models/ultralytics/bbox models/sams
 
 # Download Illustrious XL v2.0 checkpoint
 # This is a public model, no auth token required
@@ -108,8 +111,27 @@ RUN wget -q --show-progress \
     -O models/checkpoints/Illustrious-XL-v2.0.safetensors \
     https://huggingface.co/OnomaAIResearch/Illustrious-XL-v2.0/resolve/main/Illustrious-XL-v2.0.safetensors
 
+# Download 4x-UltraSharp upscaler model
+RUN wget -q --show-progress \
+    -O models/upscale_models/4x-UltraSharp.pth \
+    https://huggingface.co/Kim2091/UltraSharp/resolve/main/4x-UltraSharp.pth
+
+# Download face detection model (YOLOv8m) for FaceDetailer
+RUN wget -q --show-progress \
+    -O models/ultralytics/bbox/face_yolov8m.pt \
+    https://huggingface.co/Bingsu/adetailer/resolve/main/face_yolov8m.pt
+
+# Download SAM model for segmentation (used by FaceDetailer)
+RUN wget -q --show-progress \
+    -O models/sams/sam_vit_b_01ec64.pth \
+    https://huggingface.co/spaces/jbrinkma/segment-anything/resolve/main/sam_vit_b_01ec64.pth
+
 # Stage 3: Final image
 FROM base AS final
+
+# Copy models from downloader stage to the final image
+# Copy custom nodes from base (Impact Pack etc.)
+COPY --from=base /comfyui/custom_nodes /comfyui/custom_nodes
 
 # Copy models from downloader stage to the final image
 COPY --from=downloader /comfyui/models /comfyui/models
