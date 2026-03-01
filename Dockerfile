@@ -105,11 +105,15 @@ WORKDIR /comfyui
 # Create necessary directories
 RUN mkdir -p models/checkpoints models/vae models/upscale_models models/ultralytics/bbox models/sams
 
-# Download Illustrious XL v2.0 checkpoint
-# This is a public model, no auth token required
+# Download WAI-Illustrious-SDXL v11.0 checkpoint (upgraded from base Illustrious XL v2.0)
 RUN wget -q --show-progress \
-    -O models/checkpoints/Illustrious-XL-v2.0.safetensors \
-    https://huggingface.co/OnomaAIResearch/Illustrious-XL-v2.0/resolve/main/Illustrious-XL-v2.0.safetensors
+    -O models/checkpoints/wai-illustrious-v110.safetensors \
+    https://huggingface.co/guy39/wai-nsfw-illustrious-sdxl-v11.0/resolve/main/waiNSFWIllustrious_v110.safetensors
+
+# Download Style Pack LoRA (tested & proven in A/B tests)
+RUN mkdir -p models/loras && wget -q --show-progress \
+    -O models/loras/style-pack.safetensors \
+    "https://civitai.com/api/download/models/1558543"
 
 # Download 4x-UltraSharp upscaler model
 RUN wget -q --show-progress \
